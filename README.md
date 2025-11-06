@@ -11,6 +11,7 @@
 - https://github.com/jear/my-metallb
 - https://github.com/jear/my-traefik
 - https://github.com/jear/my-gitlab
+- https://github.com/jear/hcp-pks/tree/master/goharbor
 - https://github.com/jear/my-vault ( for secrets outside Morpheus )
 - https://github.com/jear/my-artifactory
 - https://github.com/jear/my-splunk

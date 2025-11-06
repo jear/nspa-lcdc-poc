@@ -4,6 +4,7 @@
 - Moprheus Entreprise
 - https://github.com/jear/my-infoblox
 - https://github.com/jear/my-step-ca
+- FreeIPA : https://github.com/jear/hcp-pks/tree/master/ldap
 
 ## Infra services (MKS or Rancher)
 - https://github.com/jear/my-rook-ceph 

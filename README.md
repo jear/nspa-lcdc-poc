@@ -11,6 +11,8 @@
 - https://github.com/jear/my-traefik
 - https://github.com/jear/my-gitlab
 - https://github.com/jear/my-vault ( for secrets outside Morpheus )
+- https://github.com/jear/my-artifactory
+- https://github.com/jear/my-splunk
 
 ## Svc k8s clusters (MKS or Rancher)
 - https://github.com/jear/my-keycloack

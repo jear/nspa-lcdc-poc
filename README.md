@@ -18,8 +18,10 @@
 - https://github.com/jear/my-keyfactor
 
 ## Morpheus integration
-- Keycloak
+
+- Keycloak -> adding SAML SSO Identity Source 
 - Infoblox
 
 ## Morpheus Automation 
+- Morpheus Tenant creation
 - Keycloak Realm Client creation : Importing  Morpheus SP XML

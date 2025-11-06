@@ -5,8 +5,8 @@
 - https://github.com/jear/my-infoblox
 - https://github.com/jear/my-step-ca
 
-## Infra k8s clusters (MKS or Rancher)
-- https://github.com/jear/my-rook-ceph
+## Infra services (MKS or Rancher)
+- https://github.com/jear/my-rook-ceph 
 - https://github.com/jear/my-metallb
 - https://github.com/jear/my-traefik
 - https://github.com/jear/my-gitlab
@@ -14,7 +14,7 @@
 - https://github.com/jear/my-artifactory
 - https://github.com/jear/my-splunk
 
-## Svc k8s clusters (MKS or Rancher)
+## Services (MKS or Rancher)
 - https://github.com/jear/my-keycloack
 - https://github.com/jear/my-keyfactor
 

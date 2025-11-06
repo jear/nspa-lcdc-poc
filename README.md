@@ -10,7 +10,7 @@
 - https://github.com/jear/my-metallb
 - https://github.com/jear/my-traefik
 - https://github.com/jear/my-gitlab
-- https://github.com/jear/my-vault
+- https://github.com/jear/my-vault ( for secrets outside Morpheus )
 
 ## Svc k8s clusters (MKS or Rancher)
 - https://github.com/jear/my-keycloack

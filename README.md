@@ -1,6 +1,6 @@
 # nspa-lcdc-poc
 
-# HVM or Vmare
+# HVM or Vmware
 - Moprheus Entreprise
 - https://github.com/jear/my-infoblox
 - https://github.com/jear/my-step-ca

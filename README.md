@@ -24,4 +24,4 @@
 
 ## Morpheus Automation 
 - Morpheus Tenant creation
-- Keycloak Realm Client creation : Importing  Morpheus SP XML
+- Keycloak Realm Client creation : Importing  Morpheus SP Metadata XML

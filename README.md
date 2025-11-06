@@ -9,7 +9,7 @@
 - https://github.com/jear/my-rook-ceph
 - https://github.com/jear/my-metallb
 - https://github.com/jear/my-traefik
-
+- https://github.com/jear/my-gitlab
 
 - https://github.com/jear/my-keycloack
 - https://github.com/jear/my-keyfactor

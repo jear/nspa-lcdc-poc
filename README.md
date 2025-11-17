@@ -10,6 +10,7 @@
 - https://github.com/jear/my-traefik ( for Ingressroutes ) 
 
 ## Devops Infra services on Kubernetes (Rancher)
+- https://github.com/jear/my-keycloack
 - https://github.com/jear/my-keyfactor ( EJBCA OSS PKI )
 - https://github.com/jear/my-pulp  ( https://pulpproject.org/ ) : Python pkg 
 - https://github.com/jear/my-gitlab 

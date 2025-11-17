@@ -4,7 +4,7 @@
 - Moprheus Entreprise
 - https://github.com/jear/my-infoblox
 
-## Infra services on Kubernetes (Rancher)
+## Kubernetes ( 4 nodes - Rancher ) with : 
 - https://github.com/jear/my-rook-ceph  ( For CSI with RWX )
 - https://github.com/jear/my-metallb ( for k8s LoadBalancer )
 - https://github.com/jear/my-traefik ( for Ingressroutes ) 

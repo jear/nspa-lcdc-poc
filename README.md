@@ -18,10 +18,12 @@
 - https://github.com/jear/my-vault ( for secrets not internal Morpheus Cyphers )
 - https://github.com/jear/my-artifactory ( OSS ) : for Disconnected Terraform/Puppet/Ansible provider repositories 
 
+# AI services on Kubernetes (Rancher)
+- https://github.com/jear/my-openwebui  : Disconnected  LLM with nVidia GPU 
+
 
 ## Others ( optional )
 - https://github.com/NginxProxyManager/nginx-proxy-manager
 - https://github.com/jear/my-step-ca
 - FreeIPA : https://github.com/jear/hcp-pks/tree/master/ldap
 - https://github.com/jear/my-minio
-- https://github.com/jear/my-openwebui

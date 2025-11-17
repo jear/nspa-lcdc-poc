@@ -12,11 +12,11 @@
 ## Devops Infra services on Kubernetes (Rancher)
 - https://github.com/jear/my-keycloack
 - https://github.com/jear/my-keyfactor ( EJBCA OSS PKI )
-- https://github.com/jear/my-pulp  ( https://pulpproject.org/ ) : Python pkg 
+- https://github.com/jear/my-pulp  : for Disconnected Python Pypi.org  ( https://pulpproject.org/ )
 - https://github.com/jear/my-gitlab 
 - https://github.com/jear/my-awx ( Ansible )
 - https://github.com/jear/my-vault ( for secrets not internal Morpheus Cyphers )
-- https://github.com/jear/my-artifactory ( OSS ) : Terraform/Puppet/Ansible  repositories 
+- https://github.com/jear/my-artifactory ( OSS ) : for Disconnected Terraform/Puppet/Ansible provider repositories 
 
 
 ## Others ( optional )

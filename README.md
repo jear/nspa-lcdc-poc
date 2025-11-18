@@ -11,7 +11,7 @@
 
 ## Devops Infra services on Kubernetes (Rancher)
 - https://github.com/jear/my-keycloack
-  - https://vault.gpu02.lysdemolab.fr/ui/vault/auth
+  - https://keycloak.gpu02.lysdemolab.fr/
 - https://github.com/jear/my-keyfactor ( EJBCA OSS PKI )
   - https://ejbca.gpu02.lysdemolab.fr/
 - https://github.com/jear/my-pulp  : for Disconnected Python Pypi.org  ( https://pulpproject.org/ )

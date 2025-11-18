@@ -31,7 +31,8 @@
 
 
 ## Others ( optional )
-- https://github.com/NginxProxyManager/nginx-proxy-manager
 - https://github.com/jear/my-step-ca
+  - https://step-ca.lysdemolab.fr/acme/acme/directory
 - FreeIPA : https://github.com/jear/hcp-pks/tree/master/ldap
-- https://github.com/jear/my-minio
+- https://github.com/jear/my-minio  ( S3 backend for Morpheus user  bucket / storage for default backup / storage for images  ... )
+- https://github.com/NginxProxyManager/nginx-proxy-manager

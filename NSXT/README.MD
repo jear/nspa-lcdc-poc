@@ -9,3 +9,4 @@ pip3 >= 9.x Python Installation PIP installation
 PyVmOmi - Python library for vCenter api. Installation via pip: pyVmomi installation
 OVF Tools >= 4.4.x - Ovftool is used for ovf deployment OVFTool Download and Installation
 
+Edit 00-input.yml to add all the information to match your enviroment

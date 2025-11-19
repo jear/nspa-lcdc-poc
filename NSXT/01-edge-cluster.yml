@@ -7,51 +7,8 @@
     - vmware.ansible_for_nsxt
     - community.vmware
 
-  vars:
-    nsx_hostname: "10.0.17.101"                  # NSX-Manager IP or FQDN
-    nsx_username: "admin"
-    nsx_password: "Password!234"
-    validate_certs: false
-
-    vcenter_fqdn: "vcsa8.can.cs8.local"          # vCenter as registered in NSX (usually FQDN)
-    vcenter_username: "administrator@vsphere.local"
-    vcenter_password: "Password!234"
-
-    datacenter: "AMVLAB"
-    cluster: "CL1"
-    datastore: "vsanDatastore"
-    esxi_host: "hci02.can.cs8.local"             # any host in the cluster (required for VDS env)
-
-   # These portgroups need to be created in vCenter before running this script!!!
-    mgmt_portgroup: "mgmt"
-    overlay_portgroup: "all-pg"
-    uplink1_portgroup: "edge-uplink1"
-    uplink2_portgroup: "edge-uplink2"
-
-   # The Uplink profile, Transportzones and IP pool need to be created in NSX-Manager before running this script!!!
-    uplink_profile: "edge_tn_uplink_profile"
-    overlay_tz: "tz_overlay"
-    vlan_tz: "tz_vlan"
-    tep_ip_pool: "edge-overlay"
-
-    cli_root_password: "Password!234"            # must meet 12-char complexity
-
-    edges:
-      - name: "nsx-edge-1"
-        mgmt_ip: "10.0.17.103/24"
-        hostname: "nsx-edge-1"
-      - name: "nsx-edge-2"
-        mgmt_ip: "10.0.17.104/24"
-        hostname: "nsx-edge-2"
-      - name: "nsx-edge-3"
-        mgmt_ip: "10.0.17.105/24"
-        hostname: "nsx-edge-3"
-      - name: "nsx-edge-4"
-        mgmt_ip: "10.0.17.106/24"
-        hostname: "nsx-edge-4"
-
-    edge_cluster_name_t0: "Edge-Cluster-01"
-    edge_cluster_name_t1: "Edge-Cluster-02"
+  vars_files:
+    - 00-input.yml
 
   tasks:
 

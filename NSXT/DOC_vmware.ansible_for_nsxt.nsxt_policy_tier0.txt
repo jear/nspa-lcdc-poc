@@ -1,0 +1,1065 @@
+root@ansiblemachine:/ansible# ansible-doc vmware.ansible_for_nsxt.nsxt_policy_tier0
+> MODULE vmware.ansible_for_nsxt.nsxt_policy_tier0 (/root/.ansible/collections/ansible_collections/vmware/ansible_for_nsxt/plugins/modules/nsxt_policy_>
+
+  Creates/Updates/Deletes a Tier-0 resource using the Policy API. Assocaited resources include 'Tier-0 Locale Service'
+  and 'Tier-0 Interface'. 'Tier-0 Locale Service' and 'Tier-0 Interface' attributes must be prepended with 't0ls' and
+  't0iface' respectively.
+
+OPTIONS (red indicates it is required):
+
+   achieve_subresource_state_if_del_parent  Can be used to achieve the state of subresources even if the parent(base)
+                                            resource's state is absent.
+                                            Can be specified for each subresource.
+        default: false
+        type: bool
+
+   bfd_peers  This is a list of BFD Peers that need to be created, updated, or deleted
+        default: null
+        element: dict
+        type: list
+        suboptions:
+
+           bfd_profile_display_name  The associated BFD Profile display name
+                                     Either this or bfd_profile_id must be specified
+                                     BFD Profile is not supported for IPv6 networks.
+          default: null
+          type: str
+
+           bfd_profile_id  The associated BFD Profile ID
+                           Either this or bfd_profile_display_name must be specified
+                           BFD Profile is not supported for IPv6 networks.
+          default: null
+          type: str
+
+           description  Tier-0 BFD Peer description. config
+          default: null
+          type: str
+
+           display_name  Tier-0 BFD Peer display name.
+                         Either this or id must be specified. If both are specified, id takes precedence.
+          default: null
+          type: str
+
+           enabled  Flag to enable BFD peer.
+          default: null
+          elements: dict
+          ip_address:
+            description: Next hop gateway IP address
+            type: str
+          scope:
+            description:
+            - Interface path associated with current route
+            - For example, specify a policy path referencing the IPSec VPN Session
+            type: list
+          type: list
+          suboptions:
+
+             admin_distance  Cost associated with next hop route
+            default: 1
+            type: int
+
+           id  Tier-0 BFD Peer ID.
+          default: null
+          type: str
+
+           state  State can be either 'present' or 'absent'. 'present' is used to create or update resource. 'absent' is
+                  used to delete resource.
+                  Must be specified in order to modify the resource
+          choices: [present, absent]
+          default: null
+
+           tags  Opaque identifiers meaningful to the API user
+          default: null
+          type: dict
+          suboptions:
+
+             scope  Tag scope.
+            type: str
+
+             tag  Tag value.
+            type: str
+
+   ca_path  Path to the CA bundle to be used to verify host's SSL certificate
+        default: null
+        type: str
+
+   create_or_update_subresource_first  Can be used to create subresources first.
+                                       Can be specified for each subresource.
+        default: false
+        type: bool
+
+   default_rule_logging  Enable logging for whitelisted rule. Indicates if logging should be enabled for the default
+                         whitelisting rule.
+        default: false
+
+   delete_subresource_first  Can be used to delete subresources first.
+                             Can be specified for each subresource.
+        default: true
+        type: bool
+
+   description  Tier-0 description
+        default: null
+        type: str
+
+   dhcp_config_display_name  Same as dhcp_config_id. Either one can be specified. If both are specified, dhcp_config_id
+                             takes precedence.
+        default: null
+        type: str
+
+   dhcp_config_id  DHCP configuration for Segments connected to Tier-0. DHCP service is configured in relay mode.
+        default: null
+        type: str
+
+   disable_firewall  Disable or enable gateway fiewall.
+        default: false
+        type: bool
+
+   display_name  Display name.
+                 If resource ID is not specified, display_name will be used as ID.
+        default: null
+        type: str
+
+   do_wait_till_create  Can be used to wait for the realization of subresource before the request to create the next
+                        resource is sent to the Manager.
+                        Can be specified for each subresource.
+        default: false
+        type: bool
+
+   failover_mode  Determines the behavior when a Tier-0 instance in ACTIVE-STANDBY high-availability mode restarts after
+                  a failure. If set to PREEMPTIVE, the preferred node will take over, even if it causes another failure.
+                  If set to NON_PREEMPTIVE, then the instance that restarted will remain secondary. This property must
+                  not be populated unless the ha_mode property is set to ACTIVE_STANDBY.
+        choices: [NON_PREEMPTIVE, PREEMPTIVE]
+        default: NON_PREEMPTIVE
+        type: str
+
+   force_whitelisting  Flag to add whitelisting FW rule during realization.
+        default: false
+        type: bool
+
+   ha_mode  High-availability Mode for Tier-0
+        choices: [ACTIVE_STANDBY, ACTIVE_ACTIVE]
+        default: ACTIVE_ACTIVE
+        type: str
+
+   hostname  Deployed NSX manager hostname.
+        type: str
+
+   id      Tier-0 ID
+        default: null
+        type: str
+
+   internal_transit_subnets  Internal transit subnets in CIDR format. Specify subnets that are used to assign addresses
+                             to logical links connecting service routers and distributed routers. Only IPv4 addresses are
+                             supported. When not specified, subnet 169.254.0.0/ 24 is assigned by default in
+                             ACTIVE_ACTIVE HA mode or 169.254.0.0/28 in ACTIVE_STANDBY mode.
+        default: false
+        type: list
+
+   intersite_config  Inter site routing configuration when the gateway is streched.
+        default: null
+        type: dict
+        suboptions:
+
+           fallback_sites  Fallback site to be used as new primary site on current primary site failure. Disaster
+                           recovery must be initiated via API/UI. Fallback site configuration is supported only for T0
+                           gateway. T1 gateway will follow T0 gateway's primary site during disaster recovery
+          default: null
+          type: list
+
+           intersite_transit_subnet  Transit subnet in CIDR format
+                                     IPv4 subnet for inter-site transit segment connecting service routers across sites
+                                     for stretched gateway. For IPv6 link local subnet is auto configured
+          default: 169.254.32.0/20
+          type: str
+
+           last_admin_active_epoch  Epoch of last time admin changing active LocaleServices
+                                    Epoch(in seconds) is auto updated based on system current timestamp when primary
+                                    locale service is updated. It is used for resolving conflict during site failover. If
+                                    system clock not in sync then User can optionally override this. New value must be
+                                    higher than the current value.
+          default: null
+          type: int
+
+           primary_site_path  Primary egress site for gateway.
+                              Primary egress site for gateway. T0/T1 gateway in Active/Standby mode supports stateful
+                              services on primary site. In this mode primary site must be set if gateway is stretched to
+                              more than one site. For T0 gateway in Active/Active primary site is optional field. If set
+                              then secondary site prefers routes learned from primary over locally learned routes. This
+                              field is not applicable for T1 gateway with no services
+          default: null
+          type: str
+
+   ipv6_dad_profile_display_name  Same as ipv6_dad_profile_id. Either one can be specified. If both are specified,
+                                  ipv6_dad_profile_id takes precedence.
+        default: null
+        type: str
+
+   ipv6_dad_profile_id  IPv6 DRA profile configuration on Tier0. Either or both NDRA and/or DAD profiles can be
+                        configured. Related attribute ipv6_ndra_profile_id.
+        default: null
+        type: str
+
+   ipv6_ndra_profile_display_name  Same as ipv6_ndra_profile_id. Either one can be specified. If both are specified,
+                                   ipv6_ndra_profile_id takes precedence.
+        default: null
+        type: str
+
+   ipv6_ndra_profile_id  IPv6 NDRA profile configuration on Tier0. Either or both NDRA and/or DAD profiles can be
+                         configured. Related attribute ipv6_dad_profile_id.
+        default: null
+        type: str
+
+   locale_services  This is a list of Locale Services that need to be created, updated, or deleted
+        default: null
+        element: dict
+        type: list
+        suboptions:
+
+           BGP  Specify the BGP spec in this section
+          default: null
+          type: dict
+          suboptions:
+
+             ecmp  Flag to enable ECMP.
+            default: true
+            type: bool
+
+             enabled  Flag to enable BGP configuration. Disabling will stop feature and BGP peering.
+            default: true
+            type: bool
+
+             graceful_restart_config  Configuration field to hold BGP Restart mode and timer.
+            default: null
+            type: dict
+            suboptions:
+
+               mode  BGP Graceful Restart Configuration Mode
+                     If mode is DISABLE, then graceful restart and helper modes are disabled.
+                     If mode is GR_AND_HELPER, then both graceful restart and helper modes are enabled.
+                     If mode is HELPER_ONLY, then helper mode is enabled. HELPER_ONLY mode is the ability for a BGP
+                     speaker to indicate its ability to preserve forwarding state during BGP restart.
+                     GRACEFUL_RESTART mode is the ability of a BGP speaker to advertise its restart to its peers.
+              choices: [DISABLE, GR_AND_HELPER, HELPER_ONLY]
+              default: HELPER_ONLY
+              type: str
+
+               timer  BGP Graceful Restart Timer
+              default: null
+              type: dict
+              suboptions:
+
+                 restart_timer  BGP Graceful Restart Timer
+                                Maximum time taken (in seconds) for a BGP session to be established after a restart. This
+                                can be used to speed up routing convergence by its peer in case the BGP speaker does not
+                                come back up after a restart. If the session is not re-established within this timer, the
+                                receiving speaker will delete all the stale routes from that peer. Min 1 and Max 3600
+                default: 180
+                type: int
+
+                 stale_route_timer  BGP Stale Route Timer
+                                    Maximum time (in seconds) before stale routes are removed from the RIB (Routing
+                                    Information Base) when BGP restarts. Min 1 and Max 3600
+                default: 600
+                type: int
+
+             inter_sr_ibgp  Flag to enable inter SR IBGP configuration. When not specified, inter SR IBGP is
+                            automatically enabled if Tier-0 is created in ACTIVE_ACTIVE ha_mode.
+            default: null
+            type: bool
+
+             local_as_num  BGP AS number in ASPLAIN/ASDOT Format.
+                           Specify BGP AS number for Tier-0 to advertize to BGP peers. AS number can be specified in
+                           ASPLAIN (e.g., "65546") or ASDOT (e.g., "1.10") format. Empty string disables BGP feature.
+            type: str
+
+             multipath_relax  Flag to enable BGP multipath relax option.
+            default: true
+            type: bool
+
+             neighbors  Specify the BGP neighbors in this section that need to be created, updated, or deleted
+            default: null
+            element: dict
+            type: list
+            suboptions:
+
+               address  Neighbor IP Address
+              type: str
+
+               allow_as_in  Flag to enable allowas_in option for BGP neighbor
+              default: false
+              type: bool
+
+               bfd  BFD configuration for failure detection
+                    BFD is enabled with default values when not configured
+              default: null
+              type: dict
+              suboptions:
+
+                 enabled  Flag to enable BFD cofiguration
+                default: null
+                type: bool
+
+                 interval  Time interval between heartbeat packets in milliseconds. Min 300 and Max 60000
+                default: 1000
+                type: int
+
+                 multiple  Declare dead multiple.
+                           Number of times heartbeat packet is missed before BFD declares the neighbor is down. Min 2 and
+                           Max 16
+                default: 3
+                type: int
+
+               graceful_restart_mode  BGP Graceful Restart Configuration Mode
+                                      If mode is DISABLE, then graceful restart and helper modes are disabled.
+                                      If mode is GR_AND_HELPER, then both graceful restart and helper modes are enabled.
+                                      If mode is HELPER_ONLY, then helper mode is enabled. HELPER_ONLY mode is the
+                                      ability for a BGP speaker to indicate its ability to preserve forwarding state
+                                      during BGP restart.
+                                      GRACEFUL_RESTART mode is the ability of a BGP speaker to advertise its restart to
+                                      its peers.
+              choices: [DISABLE, GR_AND_HELPER, HELPER_ONLY]
+              default: null
+              type: str
+
+               hold_down_time  Wait time in seconds before declaring peer dead. Min 1 and Max 65535
+              default: 180
+              type: int
+
+               keep_alive_time  Interval between keep alive messages sent to peer. Min 1 and Max 65535.
+              default: 60
+              type: int
+
+               maximum_hop_limit  Maximum number of hops allowed to reach BGP neighbor. Min 1 and Max 255
+              default: 1
+              type: int
+
+               password  Password for BGP Neighbor authentication. Empty string ("") clears existing password.
+              default: null
+              type: str
+
+               remote_as_num  4 Byte ASN of the neighbor in ASPLAIN Format
+              type: str
+
+               route_filtering  Enable address families and route filtering in each direction
+              default: null
+              elements: dict
+              type: list
+              suboptions:
+
+                 address_family  Address family type
+                choices: [IPV4, IPV6, VPN]
+                default: null
+                type: str
+
+                 enabled  Flag to enable address family
+                default: true
+                type: bool
+
+                 in_route_filters  Prefix-list or route map path for IN direction
+                                   Specify path of prefix-list or route map to filter routes for IN direction.
+                default: null
+                type: list
+
+                 out_route_filters  Prefix-list or route map path for OUT direction
+                                    Specify path of prefix-list or route map to filter routes for OUT direction. When not
+                                    specified, a built-in prefix-list named 'prefixlist-out-default' is automatically
+                                    applied.
+                default: null
+                type: list
+
+               source_addresses  Source IP Addresses for BGP peering
+                                 Source addresses should belong to Tier0 external or loopback interface IP Addresses. BGP
+                                 peering is formed from all these addresses. This property is mandatory when
+                                 maximum_hop_limit is greater than 1.
+              default: null
+              type: list
+
+             route_aggregations  List of routes to be aggregated
+            default: null
+            type: dict
+            suboptions:
+
+               prefix  CIDR of aggregate address
+              type: str
+
+               summary_only  Send only summarized route.
+                             Summarization reduces number of routes advertised by representing multiple related routes
+                             with prefix property
+              default: true
+              type: bool
+
+           achieve_subresource_state_if_del_parent  Can be used to achieve the state of subresources even if the
+                                                    parent(base) resource's state is absent.
+                                                    Can be specified for each subresource.
+          default: false
+          type: bool
+
+           create_or_update_subresource_first  Can be used to create subresources first.
+                                               Can be specified for each subresource.
+          default: false
+          type: bool
+
+           delete_subresource_first  Can be used to delete subresources first.
+                                     Can be specified for each subresource.
+          default: true
+          type: bool
+
+           description  Tier-0 Locale Service  description.
+          default: null
+          type: str
+
+           display_name  Tier-0 Locale Service display name.
+                         Either this or id must be specified. If both are specified, id takes precedence
+          default: null
+          type: str
+
+           do_wait_till_create  Can be used to wait for the realization of subresource before the request to create the
+                                next resource is sent to the Manager.
+                                Can be specified for each subresource.
+          default: false
+          type: bool
+
+           edge_cluster_info  Used to create path to edge cluster. Auto-assigned if associated enforcement-point has only
+                              one edge cluster.
+          default: null
+          type: dict
+          suboptions:
+
+             edge_cluster_display_name  display name of the edge cluster.
+                                        Either this or edge_cluster_id must be specified. If both are specified,
+                                        edge_cluster_id takes precedence
+            default: null
+            type: str
+
+             edge_cluster_id  ID of the edge cluster
+            default: null
+            type: str
+
+             enforcementpoint_id  enforcementpoint_id where edge cluster is located
+            default: default
+            type: str
+
+             site_id  site_id where edge cluster is located
+            default: default
+            type: str
+
+           ha_vip_configs  Array of HA VIP Config.
+                           This configuration can be defined only for Active-Standby Tier0 gateway to provide redundancy.
+                           For mulitple external interfaces, multiple HA VIP configs must be defined and each config will
+                           pair exactly two external interfaces. The VIP will move and will always be owned by the Active
+                           node. When this property is configured, configuration of dynamic-routing is not allowed.
+          default: null
+          elements: dict
+          type: list
+          suboptions:
+
+             enabled  Flag to enable this HA VIP config.
+            default: true
+            type: bool
+
+             external_interface_paths  Policy paths to Tier0 external interfaces for providing redundancy
+                                       Policy paths to Tier0 external interfaces which are to be paired to provide
+                                       redundancy. Floating IP will be owned by one of these interfaces depending upon
+                                       which edge node is Active.
+            default: null
+            type: list
+
+             vip_subnets  VIP floating IP address subnets
+                          Array of IP address subnets which will be used as floating IP addresses.
+            default: null
+            type: list
+            suboptions:
+
+               ip_addresses  IP addresses assigned to interface
+              type: list
+
+               prefix_len  Subnet prefix length
+              type: int
+
+           id  Tier-0 Locale Service ID.
+          default: null
+          type: str
+
+           interfaces  Specify the interfaces associated with the Gateway in this section that need to be created,
+                       updated, or deleted
+          default: null
+          element: dict
+          type: list
+          suboptions:
+
+             access_vlan_id  Vlan id
+            default: null
+            type: int
+
+             achieve_subresource_state_if_del_parent  Can be used to achieve the state of subresources even if the
+                                                      parent(base) resource's state is absent.
+                                                      Can be specified for each subresource.
+            default: false
+            type: bool
+
+             create_or_update_subresource_first  Can be used to create subresources first.
+                                                 Can be specified for each subresource.
+            default: false
+            type: bool
+
+             delete_subresource_first  Can be used to delete subresources first.
+                                       Can be specified for each subresource.
+            default: true
+            type: bool
+
+             description  Tier-0 Interface  description
+            default: null
+            type: str
+
+             display_name  Tier-0 Interface display name
+                           Either this or id must be specified. If both are specified, id takes precedence.
+            default: null
+            type: str
+
+             do_wait_till_create  Can be used to wait for the realization of subresource before the request to create the
+                                  next resource is sent to the Manager.
+                                  Can be specified for each subresource.
+            default: false
+            type: bool
+
+             edge_node_info  Info to create policy path to edge node to handle externalconnectivity.
+                             Required if interface type is EXTERNAL and id != null
+            default: null
+            type: dict
+            suboptions:
+
+               edge_cluster_display_name  display name of the edge cluster.
+                                          either this or edge_cluster_id must be specified. If both are specified,
+                                          edge_cluster_id takes precedence
+              default: null
+              type: str
+
+               edge_cluster_id  edge_cluster_id where edge node is located
+              default: null
+              type: str
+
+               edge_node_display_name  Display name of the edge node.
+                                       either this or edge_node_id must be specified. If both are specified, edge_node_id
+                                       takes precedence.
+              default: null
+              type: str
+
+               edge_node_id  ID of the edge node
+              default: null
+              type: str
+
+               enforcementpoint_id  enforcementpoint_id where edge node is located
+              default: default
+              type: str
+
+               site_id  site_id where edge node is located
+              default: default
+              type: str
+
+             id  Tier-0 Interface ID
+            default: null
+            type: str
+
+             ipv6_ndra_profile_display_name  Same as ipv6_ndra_profile_id. Either one should be specified.
+            default: null
+            type: str
+
+             ipv6_ndra_profile_id  Configuration IPv6 NDRA profile. Only one NDRA profile can be configured.
+            default: null
+            type: str
+
+             mtu  MTU size
+                  Maximum transmission unit (MTU) specifies the size of the largest packet that a network protocol can
+                  transmit.
+            default: null
+            type: int
+
+             multicast  Multicast PIM configuration
+            default: null
+            type: dict
+            suboptions:
+
+               enabled  enable/disable PIM configuration
+              default: false
+              type: bool
+
+             segment_display_name  Same as segment_id
+                                   Either this or segment_id must be specified. If both are specified, segment_id takes
+                                   precedence.
+            default: null
+            type: str
+
+             segment_id  Specify Segment to which this interface is connected to. Required if id is specified.
+            default: null
+            type: str
+
+             state  State can be either 'present' or 'absent'. 'present' is used to create or update resource. 'absent'
+                    is used to delete resource.
+                    Required if segp_id != null
+            choices: [present, absent]
+            default: null
+
+             subnets  IP address and subnet specification for interface
+                      Specify IP address and network prefix for interface.
+                      Required if id != null.
+            default: null
+            type: list
+
+             tags  Opaque identifiers meaningful to the API user
+            default: null
+            type: dict
+            suboptions:
+
+               scope  Tag scope.
+              type: str
+
+               tag  Tag value.
+              type: str
+
+             type  Interface type
+            choices: [EXTERNAL, LOOPBACK, SERVICE]
+            default: EXTERNAL
+            type: str
+
+             urpf_mode  Unicast Reverse Path Forwarding mode
+            choices: [NONE, STRICT]
+            default: STRICT
+            type: str
+
+           preferred_edge_nodes_info  Used to create paths to edge nodes. Specified edge is used as preferred edge
+                                      cluster member when failover mode is set to PREEMPTIVE, not applicable otherwise.
+          default: null
+          type: list
+          suboptions:
+
+             edge_cluster_display_name  display name of the edge cluster.
+                                        either this or edge_cluster_id must be specified. If both are specified,
+                                        edge_cluster_id takes precedence
+            default: null
+            type: str
+
+             edge_cluster_id  edge_cluster_id where edge node is located
+            default: null
+            type: str
+
+             edge_node_display_name  Display name of the edge node.
+                                     either this or edge_node_id must be specified. If both are specified, edge_node_id
+                                     takes precedence
+            default: null
+            type: str
+
+             edge_node_id  ID of the edge node
+            default: null
+            type: str
+
+             enforcementpoint_id  enforcementpoint_id where edge node is located
+            default: default
+            type: str
+
+             site_id  site_id where edge node is located
+            default: default
+            type: str
+
+           route_redistribution_config  Configure all route redistribution properties like enable/disable redistributon,
+                                        redistribution rule and so on.
+          default: null
+          type: dict
+          suboptions:
+
+             bgp_enabled  Flag to enable route redistribution.
+            default: false
+            type: bool
+
+             redistribution_rules  List of redistribution rules.
+            default: null
+            elements: dict
+            type: list
+            suboptions:
+
+               name  Rule name
+              default: null
+              type: str
+
+               route_map_path  Route map to be associated with the redistribution rule
+              default: null
+              type: str
+
+               route_redistribution_types  Tier-0 route redistribution types
+              choices: [TIER0_STATIC - Redistribute user added static routes., 'TIER0_CONNECTED - Redistribute
+                  all subnets configured on Interfaces and routes related to TIER0_ROUTER_LINK,
+                  TIER0_SEGMENT, TIER0_DNS_FORWARDER_IP, TIER0_IPSEC_LOCAL_IP, TIER0_NAT types.',
+                TIER1_STATIC - Redistribute all subnets and static routes advertised by Tier-1s.,
+                TIER0_EXTERNAL_INTERFACE - Redistribute external interface subnets on Tier-0., TIER0_LOOPBACK_INTERFACE
+                  - Redistribute loopback interface subnets on Tier-0., TIER0_SEGMENT - Redistribute
+                  subnets configured on Segments connected to Tier-0., TIER0_ROUTER_LINK - Redistribute
+                  router link port subnets on Tier-0., TIER0_SERVICE_INTERFACE - Redistribute Tier0
+                  service interface subnets., TIER0_DNS_FORWARDER_IP - Redistribute DNS forwarder
+                  subnets., TIER0_IPSEC_LOCAL_IP - Redistribute IPSec subnets., TIER0_NAT - Redistribute
+                  NAT IPs owned by Tier-0., TIER0_EVPN_TEP_IP - Redistribute EVPN local endpoint
+                  subnets on Tier-0., TIER1_NAT - Redistribute NAT IPs advertised by Tier-1 instances.,
+                TIER1_LB_VIP - Redistribute LB VIP IPs advertised by Tier-1 instances., TIER1_LB_SNAT
+                  - Redistribute LB SNAT IPs advertised by Tier-1 instances., TIER1_DNS_FORWARDER_IP
+                  - Redistribute DNS forwarder subnets on Tier-1 instances., TIER1_CONNECTED - Redistribute
+                  all subnets configured on Segments and Service Interfaces., TIER1_SERVICE_INTERFACE
+                  - Redistribute Tier1 service interface subnets., TIER1_SEGMENT - Redistribute
+                  subnets configured on Segments connected to Tier1., TIER1_IPSEC_LOCAL_ENDPOINT
+                  - Redistribute IPSec VPN local-endpoint subnets advertised by TIER1.]
+              default: null
+              type: list
+
+           route_redistribution_types  Enable redistribution of different types of routes on Tier-0.
+                                       This property is only valid for locale-service under Tier-0.
+                                       This property is deprecated, please use "route_redistribution_config" property to
+                                       configure redistribution rules.
+          choices: [TIER0_STATIC - Redistribute user added static routes., 'TIER0_CONNECTED - Redistribute
+              all subnets configured on Interfaces and routes related to TIER0_ROUTER_LINK,
+              TIER0_SEGMENT, TIER0_DNS_FORWARDER_IP, TIER0_IPSEC_LOCAL_IP, TIER0_NAT types.',
+            TIER1_STATIC - Redistribute all subnets and static routes advertised by Tier-1s.,
+            TIER0_EXTERNAL_INTERFACE - Redistribute external interface subnets on Tier-0., TIER0_LOOPBACK_INTERFACE
+              - Redistribute loopback interface subnets on Tier-0., TIER0_SEGMENT - Redistribute
+              subnets configured on Segments connected to Tier-0., TIER0_ROUTER_LINK - Redistribute
+              router link port subnets on Tier-0., TIER0_SERVICE_INTERFACE - Redistribute Tier0
+              service interface subnets., TIER0_DNS_FORWARDER_IP - Redistribute DNS forwarder
+              subnets., TIER0_IPSEC_LOCAL_IP - Redistribute IPSec subnets., TIER0_NAT - Redistribute
+              NAT IPs owned by Tier-0., TIER0_EVPN_TEP_IP - Redistribute EVPN local endpoint
+              subnets on Tier-0., TIER1_NAT - Redistribute NAT IPs advertised by Tier-1 instances.,
+            TIER1_LB_VIP - Redistribute LB VIP IPs advertised by Tier-1 instances., TIER1_LB_SNAT
+              - Redistribute LB SNAT IPs advertised by Tier-1 instances., TIER1_DNS_FORWARDER_IP
+              - Redistribute DNS forwarder subnets on Tier-1 instances., TIER1_CONNECTED - Redistribute
+              all subnets configured on Segments and Service Interfaces., TIER1_SERVICE_INTERFACE
+              - Redistribute Tier1 service interface subnets., TIER1_SEGMENT - Redistribute
+              subnets configured on Segments connected to Tier1., TIER1_IPSEC_LOCAL_ENDPOINT
+              - Redistribute IPSec VPN local-endpoint subnets advertised by TIER1.]
+          default: null
+          type: list
+
+           state  State can be either 'present' or 'absent'. 'present' is used to create or update resource. 'absent' is
+                  used to delete resource
+                  Required if id is specified.
+          choices: [present, absent]
+          default: null
+
+           tags  Opaque identifiers meaningful to the API user
+          default: null
+          type: dict
+          suboptions:
+
+             scope  Tag scope.
+            type: str
+
+             tag  Tag value.
+            type: str
+
+   nsx_cert_path  Path to the certificate created for the Principal Identity using which the CRUD operations should be
+                  performed
+        default: null
+        type: str
+
+   nsx_key_path  Path to the certificate key created for the Principal Identity using which the CRUD operations should be
+                 performed
+                 Must be specified if nsx_cert_path is specified
+        default: null
+        type: str
+
+   password  The password to authenticate with the NSX manager.
+             Must be specified if username is specified
+        default: null
+        type: str
+
+   rd_admin_field  Route distinguisher administrator address
+                   If you are using EVPN service, then route distinguisher administrator address should be defined if you
+                   need auto generation of route distinguisher on your VRF configuration
+        default: null
+        type: str
+
+   request_headers  HTTP request headers to be sent to the host while making any request
+        default: null
+        type: dict
+
+   state   State can be either 'present' or 'absent'. 'present' is used to create or update resource. 'absent' is used to
+           delete resource.
+        choices: [present, absent]
+
+   static_routes  This is a list of Static Routes that need to be created, updated, or deleted
+        default: null
+        element: dict
+        type: list
+        suboptions:
+
+           achieve_subresource_state_if_del_parent  Can be used to achieve the state of subresources even if the
+                                                    parent(base) resource's state is absent.
+                                                    Can be specified for each subresource.
+          default: false
+          type: bool
+
+           description  Tier-0 Static Route description.
+          default: null
+          type: str
+
+           display_name  Tier-0 Static Route display name.
+                         Either this or id must be specified. If both are specified, id takes precedence.
+          default: null
+          type: str
+
+           do_wait_till_create  Can be used to wait for the realization of subresource before the request to create the
+                                next resource is sent to the Manager
+          default: false
+          type: bool
+
+           id  Tier-0 Static Route ID.
+          default: null
+          type: str
+
+           network  Network address in CIDR format
+          type: str
+
+           next_hops  Next hop routes for network
+          default: null
+          elements: dict
+          ip_address:
+            description: Next hop gateway IP address
+            type: str
+          scope:
+            description:
+            - Interface path associated with current route
+            - For example, specify a policy path referencing the IPSec VPN Session
+            type: list
+          type: list
+          suboptions:
+
+             admin_distance  Cost associated with next hop route
+            default: 1
+            type: int
+
+           state  State can be either 'present' or 'absent'. 'present' is used to create or update resource. 'absent' is
+                  used to delete resource.
+                  Must be specified in order to modify the resource
+          choices: [present, absent]
+          default: null
+
+           tags  Opaque identifiers meaningful to the API user
+          default: null
+          type: dict
+          suboptions:
+
+             scope  Tag scope.
+            type: str
+
+             tag  Tag value.
+            type: str
+
+   tags    Opaque identifiers meaningful to the API user.
+        default: null
+        type: dict
+        suboptions:
+
+           scope  Tag scope.
+          type: str
+
+           tag  Tag value.
+          type: str
+
+   transit_subnets  Transit subnets in CIDR format. Specify transit subnets that are used to assign addresses to logical
+                    links connecting tier-0 and tier-1s. Both IPv4 and IPv6 addresses are supported. When not specified,
+                    subnet 100.64.0.0/16 is configured by default.
+        default: null
+        type: list
+
+   username  The username to authenticate with the NSX manager.
+        default: null
+        type: str
+
+   validate_certs  Enable server certificate verification.
+        default: false
+        type: bool
+
+   vrf_config  VRF config, required for VRF Tier0
+        default: null
+        type: dict
+        suboptions:
+
+           description  Description of this resource
+          default: null
+          type: str
+
+           display_name  Identifier to use when displaying entity in logs or GUI
+                         Defaults to id if not set
+                         Error if both not specified
+          default: null
+          type: str
+
+           evpn_transit_vni  L3 VNI associated with the VRF for overlay traffic.
+                             VNI must be unique and belong to configured VNI pool.
+          default: null
+          type: int
+
+           id  Unique identifier of this resource
+               Defaults to display_name if not set
+               Error if both not specified
+          default: null
+          type: str
+
+           route_distinguisher  Route distinguisher. 'ASN:<>' or 'IPAddress:<>'.
+          default: null
+          type: str
+
+           route_targets  Route targets
+          default: null
+          element: dict
+          type: list
+          suboptions:
+
+             description  Description of this resource
+            default: null
+            type: str
+
+             display_name  Identifier to use when displaying entity in logs or GUI
+                           Defaults to id if not set
+                           Error if both not specified
+            default: null
+            type: str
+
+             export_route_targets  Export route targets. 'ASN:' or 'IPAddress:<>'
+            default: null
+            element: str
+            type: list
+
+             id  Unique identifier of this resource
+                 Defaults to display_name if not set
+                 Error if both not specified
+            default: null
+            type: str
+
+             import_route_targets  Import route targets. 'ASN:' or 'IPAddress:<>'
+            default: null
+            element: str
+            type: list
+
+             tags  Opaque identifiers meaningful to the API user
+            default: null
+            element: dict
+            type: list
+            suboptions:
+
+               scope  Tag scope
+              default: null
+              type: str
+
+               tag  Tag value
+              default: null
+              type: str
+
+           tags  Opaque identifiers meaningful to the API user
+          default: null
+          element: dict
+          type: list
+          suboptions:
+
+             scope  Tag scope
+            default: null
+            type: str
+
+             tag  Tag value
+            default: null
+            type: str
+
+           tier0_display_name  Default tier0 display name. Cannot be modified after realization. Either this or tier0_id
+                               must be specified
+          default: null
+          type: str
+
+           tier0_id  Default tier0 id. Cannot be modified after realization. Either this or tier0_id must be specified
+          default: null
+          type: str
+
+AUTHOR: Gautam Verma
+
+METADATA:           metadata_version: '1.1'
+          status:
+          - preview
+          supported_by: community
+
+EXAMPLES:
+- name: create Tier0
+  nsxt_policy_tier0:
+    hostname: "10.10.10.10"
+    nsx_cert_path: /root/com.vmware.nsx.ncp/nsx.crt
+    nsx_key_path: /root/com.vmware.nsx.ncp/nsx.key
+    validate_certs: False
+    display_name: test-tier0-1
+    state: present
+    ha_mode: "ACTIVE_STANDBY"
+    failover_mode: "PREEMPTIVE"
+    disable_firewall: True
+    force_whitelisting: True
+    rd_admin_field: "122.34.12.124"
+    tags:
+      - scope: "a"
+        tag: "b"
+    static_routes:
+      - state: present
+        display_name: test-sr
+        network: '12.12.12.0/24'
+        next_hops:
+          - ip_address: "192.165.1.4"
+    bfd_peers:
+      - state: present
+        display_name: test-peer-1
+        peer_address: "192.100.100.5"
+        bfd_profile_id: test-bfd-config
+    locale_services:
+      - state: present
+        id: "test-t0ls"
+        route_redistribution_config:
+          redistribution_rules:
+            - name: abc
+              route_redistribution_types: ["TIER0_STATIC", "TIER0_NAT"]
+        edge_cluster_info:
+          edge_cluster_id: "7ef91a10-c780-4f48-a279-a5662db4ffa3"
+        preferred_edge_nodes_info:
+          - edge_cluster_id: "7ef91a10-c780-4f48-a279-a5662db4ffa3"
+            edge_node_id: "e10c42dc-db27-11e9-8cd0-000c291af7ee"
+        BGP:
+          state: present
+          local_as_num: '1211'
+          inter_sr_ibgp: False
+          graceful_restart_config:
+          mode: "GR_AND_HELPER"
+          timer:
+            restart_timer: 12
+          route_aggregations:
+            - prefix: "10.1.1.0/24"
+            - prefix: "11.1.0.0/24"
+              summary_only: False
+          neighbors:
+            - display_name: neigh1
+              address: "1.2.3.4"
+              remote_as_num: "12"
+              state: present
+        interfaces:
+          - id: "test-t0-t0ls-iface"
+            display_name: "test-t0-t0ls-iface"
+            state: present
+            subnets:
+              - ip_addresses: ["35.1.1.1"]
+                prefix_len: 24
+            segment_id: "test-seg-4"
+            edge_node_info:
+              edge_cluster_id: "7ef91a10-c780-4f48-a279-a5662db4ffa3"
+              edge_node_id: "e10c42dc-db27-11e9-8cd0-000c291af7ee"
+            mtu: 1500
+            urpf_mode: "NONE"
+            multicast:
+              enabled: True
+            ipv6_ndra_profile_display_name: test
+    vrf_config:
+      display_name: my-vrf
+      id: my-vrf2
+      tier0_display_name: node-t0
+      tags:
+        - scope: scope-tag-1
+          tag: value-tag-1
+      route_distinguisher: 'ASN:4000'
+      evpn_transit_vni: 6000
+

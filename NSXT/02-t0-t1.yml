@@ -1,0 +1,176 @@
+---
+- name: Create Uplink Segments + Full Tier-0 with Interfaces and BGP in one task
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - vmware.ansible_for_nsxt
+
+  vars:
+    nsx_hostname: "10.0.17.101"
+    nsx_username: "admin"
+    nsx_password: "Password!234"
+    validate_certs: false
+
+    edges:
+      - name: "nsx-edge-1"
+        mgmt_ip: "10.0.17.103/24"
+        hostname: "nsx-edge-1"
+      - name: "nsx-edge-2"
+        mgmt_ip: "10.0.17.104/24"
+        hostname: "nsx-edge-2"
+      - name: "nsx-edge-3"
+        mgmt_ip: "10.0.17.105/24"
+        hostname: "nsx-edge-3"
+      - name: "nsx-edge-4"
+        mgmt_ip: "10.0.17.106/24"
+        hostname: "nsx-edge-4"
+
+    edge_cluster_name_t0: "Edge-Cluster-01"
+    edge_cluster_name_t1: "Edge-Cluster-02"
+    tier0_name: "T0-GW"
+    local_as: 65002
+    remote_as: 65001
+    tier1_name: "T1-GW"
+
+    # Uplink details
+    vlan_tz: "tz_vlan"
+    uplink1:
+      vlan: 103
+      segment_name: "UPLINK-VLAN103"
+      nsx_ip1: "172.28.13.2/24"
+      nsx_ip2: "172.28.13.3/24"
+      neighbor_ip: "172.28.13.1"
+    uplink2:
+      vlan: 102
+      segment_name: "UPLINK-VLAN102"
+      nsx_ip1: "172.28.12.2/24"
+      nsx_ip2: "172.28.12.3/24"
+      neighbor_ip: "172.28.12.1"
+
+  tasks:
+
+    - name: Create Uplink VLAN Segments (VLAN Transport Zone)
+      vmware.ansible_for_nsxt.nsxt_policy_segment:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ item.segment_name }}"
+        transport_zone_display_name: "{{ vlan_tz }}"
+        vlan_ids: "{{ item.vlan }}"
+        state: present
+      loop:
+        - { vlan: "{{ uplink1.vlan }}", segment_name: "{{ uplink1.segment_name }}" }
+        - { vlan: "{{ uplink2.vlan }}", segment_name: "{{ uplink2.segment_name }}" }
+
+    - name: Create Tier-0 with Interfaces and BGP configuration
+      vmware.ansible_for_nsxt.nsxt_policy_tier0:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+
+        display_name: "{{ tier0_name }}"
+        ha_mode: "ACTIVE_ACTIVE"
+        failover_mode: "NON_PREEMPTIVE"
+        locale_services:
+          - state: present
+            display_name: "{{ tier0_name }}"
+            edge_cluster_info:
+              edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+            BGP:
+              state: present
+              enabled: true
+              local_as_num: "{{ local_as }}"
+              graceful_restart_config:
+                mode: "HELPER_ONLY"          # or "GR_AND_HELPER" if you want full GR
+              inter_sr_ibgp: false
+
+              neighbors:
+                - display_name: "Neighbor-{{ uplink1.neighbor_ip }}"
+                  neighbor_address: "{{ uplink1.neighbor_ip }}"
+                  remote_as_num: "{{ remote_as }}"
+                  state: present
+
+                - display_name: "Neighbor-{{ uplink2.neighbor_ip }}"
+                  neighbor_address: "{{ uplink2.neighbor_ip }}"
+                  remote_as_num: "{{ remote_as }}"
+                  state: present
+            interfaces:
+              - display_name: "UPLINK-1-edge-1"
+                state: present
+                segment_display_name: "{{ uplink1.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink1.nsx_ip1.split('/')[0] }}"
+                    prefix_len: "{{ uplink1.nsx_ip1.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[0].hostname }}"
+
+              - display_name: "UPLINK-2-edge-1"
+                state: present
+                segment_display_name: "{{ uplink2.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink2.nsx_ip1.split('/')[0] }}"
+                    prefix_len: "{{ uplink2.nsx_ip1.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[0].hostname }}"
+              - display_name: "UPLINK-1-edge-2"
+                state: present
+                segment_display_name: "{{ uplink1.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink1.nsx_ip2.split('/')[0] }}"
+                    prefix_len: "{{ uplink1.nsx_ip2.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[1].hostname }}"
+
+              - display_name: "UPLINK-2-edge-2"
+                state: present
+                segment_display_name: "{{ uplink2.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink2.nsx_ip2.split('/')[0] }}"
+                    prefix_len: "{{ uplink2.nsx_ip2.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[1].hostname }}"
+        state: present
+
+    - name: create Tier1
+      vmware.ansible_for_nsxt.nsxt_policy_tier1:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ tier1_name }}"
+        state: present
+        failover_mode: "NON_PREEMPTIVE"
+        enable_standby_relocation: False
+        route_advertisement_types:
+            - "TIER1_STATIC_ROUTES"
+            - "TIER1_CONNECTED"
+            - "TIER1_NAT"
+            - "TIER1_DNS_FORWARDER_IP"
+            - "TIER1_IPSEC_LOCAL_ENDPOINT"
+        tier0_display_name: "{{ tier0_name }}"
+        locale_services:
+          - state: present
+            display_name: "{{ tier1_name }}"
+            edge_cluster_info:
+              edge_cluster_display_name: "{{ edge_cluster_name_t1 }}"
+
+
+    - name: Done
+      ansible.builtin.debug:
+        msg: >-
+          Tier-0 '{{ tier0_name }}' created successfully!
+          Tier-1 '{{ tier1_name }}' created successfully!
+          Local AS: {{ local_as }}
+          BGP neighbors: {{ uplink1.neighbor_ip }} and {{ uplink2.neighbor_ip }}
+          Uplink interfaces: {{ uplink1.nsx_ip1 }} {{ uplink1.nsx_ip2 }} (VLAN {{ uplink1.vlan }}) and {{ uplink2.nsx_ip1 }} {{ uplink2.nsx_ip2 }} (VLAN {{ uplink2.vlan }})

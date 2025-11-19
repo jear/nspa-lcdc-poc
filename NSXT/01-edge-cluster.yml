@@ -1,0 +1,165 @@
+---
+- name: Deploy NSX-T Edge Nodes via NSX Manager and form Edge Cluster
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - vmware.ansible_for_nsxt
+    - community.vmware
+
+  vars:
+    nsx_hostname: "10.0.17.101"                  # NSX-Manager IP or FQDN
+    nsx_username: "admin"
+    nsx_password: "Password!234"
+    validate_certs: false
+
+    vcenter_fqdn: "vcsa8.can.cs8.local"          # vCenter as registered in NSX (usually FQDN)
+    vcenter_username: "administrator@vsphere.local"
+    vcenter_password: "Password!234"
+
+    datacenter: "AMVLAB"
+    cluster: "CL1"
+    datastore: "vsanDatastore"
+    esxi_host: "hci02.can.cs8.local"             # any host in the cluster (required for VDS env)
+
+   # These portgroups need to be created in vCenter before running this script!!!
+    mgmt_portgroup: "mgmt"
+    overlay_portgroup: "all-pg"
+    uplink1_portgroup: "edge-uplink1"
+    uplink2_portgroup: "edge-uplink2"
+
+   # The Uplink profile, Transportzones and IP pool need to be created in NSX-Manager before running this script!!!
+    uplink_profile: "edge_tn_uplink_profile"
+    overlay_tz: "tz_overlay"
+    vlan_tz: "tz_vlan"
+    tep_ip_pool: "edge-overlay"
+
+    cli_root_password: "Password!234"            # must meet 12-char complexity
+
+    edges:
+      - name: "nsx-edge-1"
+        mgmt_ip: "10.0.17.103/24"
+        hostname: "nsx-edge-1"
+      - name: "nsx-edge-2"
+        mgmt_ip: "10.0.17.104/24"
+        hostname: "nsx-edge-2"
+      - name: "nsx-edge-3"
+        mgmt_ip: "10.0.17.105/24"
+        hostname: "nsx-edge-3"
+      - name: "nsx-edge-4"
+        mgmt_ip: "10.0.17.106/24"
+        hostname: "nsx-edge-4"
+
+    edge_cluster_name_t0: "Edge-Cluster-01"
+    edge_cluster_name_t1: "Edge-Cluster-02"
+
+  tasks:
+
+    - name: Deploy and fully configure Edge Transport Nodes
+      vmware.ansible_for_nsxt.nsxt_transport_nodes:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+
+        display_name: "{{ item.name }}"
+        description: "Deployed by Ansible"
+
+        # === Datapath configuration (N-VDS) ===
+        host_switch_spec:
+          resource_type: "StandardHostSwitchSpec"
+          host_switches:
+            - host_switch_name: "nvds-edge"
+              host_switch_profiles:
+                - name: "{{ uplink_profile }}"
+                  type: "UplinkHostSwitchProfile"
+              pnics:
+                - device_name: "fp-eth1"
+                  uplink_name: "m1"
+                - device_name: "fp-eth2"
+                  uplink_name: "m2"
+              ip_assignment_spec:
+                resource_type: "StaticIpPoolSpec"
+                ip_pool_name: "{{ tep_ip_pool }}"
+              transport_zone_endpoints:
+                - transport_zone_name: "{{ overlay_tz }}"
+                - transport_zone_name: "{{ vlan_tz }}"
+
+        # === Edge VM deployment info ===
+        node_deployment_info:
+          resource_type: "EdgeNode"
+          display_name: "{{ item.name }}"
+          deployment_type: "VIRTUAL_MACHINE"
+          fqdn: "{{ item.hostname }}"
+          node_settings:
+            hostname: "{{ item.hostname }}"
+            allow_ssh_root_login: true
+            enable_ssh: true
+            dns_servers:
+              - "10.0.15.254"
+            search_domains:
+              - "can.cs8.local"
+            ntp_servers:
+              - "10.0.15.250"
+
+          deployment_config:
+            form_factor: "MEDIUM"                     # SMALL / MEDIUM / LARGE / XLARGE
+            node_user_settings:
+              cli_password: "{{ cli_root_password }}"
+              root_password: "{{ cli_root_password }}"
+            vm_deployment_config:
+              placement_type: "VsphereDeploymentConfig"
+              vc_name: "vcsa8"
+              vc_username: "{{ vcenter_username }}"
+              vc_password: "{{ vcenter_password }}"
+              host: "{{ esxi_host }}"
+              compute: "{{ cluster }}"
+              storage: "{{ datastore }}"
+              management_network: "{{ mgmt_portgroup }}"
+              data_networks:
+                - "{{ overlay_portgroup }}"
+                - "{{ uplink1_portgroup }}"
+                - "{{ uplink2_portgroup }}"
+              ipv4_assignment_enabled: true
+              management_port_subnets:
+                - ip_addresses:
+                    - "{{ item.mgmt_ip.split('/')[0] }}"
+                  prefix_length: "{{ item.mgmt_ip.split('/')[1] }}"
+              default_gateway_addresses:
+                - "10.0.17.10"
+        state: present
+      loop: "{{ edges }}"
+      register: edge_deploy
+      retries: 3
+      delay: 30
+
+        # === Edge Cluster deployment info ===
+    - name: Create Edge Cluster for T0
+      vmware.ansible_for_nsxt.nsxt_edge_clusters:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ edge_cluster_name_t0 }}"
+        members:
+          - transport_node_name: "{{ edges[0].hostname }}"
+          - transport_node_name: "{{ edges[1].hostname }}"
+        state: present
+
+    - name: Create Edge Cluster for T1
+      vmware.ansible_for_nsxt.nsxt_edge_clusters:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ edge_cluster_name_t1 }}"
+        members:
+          - transport_node_name: "{{ edges[2].hostname }}"
+          - transport_node_name: "{{ edges[3].hostname }}"
+        state: present
+        
+    - name: Done
+      ansible.builtin.debug:
+        msg: >-
+          Edge Cluster for T0 '{{ edge_cluster_name_t0 }}' created successfully!
+          Edge Cluster for T1 '{{ edge_cluster_name_t1 }}' created successfully!

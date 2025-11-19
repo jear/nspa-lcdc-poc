@@ -1,0 +1,67 @@
+---
+    nsx_hostname: "10.0.17.101"                  # NSX-Manager IP or FQDN
+    nsx_username: "admin"
+    nsx_password: "Password!234"
+    validate_certs: false
+
+    vcenter_fqdn: "vcsa8.can.cs8.local"          # vCenter as registered in NSX (usually FQDN)
+    vcenter_username: "administrator@vsphere.local"
+    vcenter_password: "Password!234"
+
+    datacenter: "AMVLAB"
+    cluster: "CL1"
+    datastore: "vsanDatastore"
+    esxi_host: "hci02.can.cs8.local"             # any host in the cluster (required for VDS env)
+
+   # These portgroups need to be created in vCenter before running this script!!!
+    mgmt_portgroup: "mgmt"
+    overlay_portgroup: "all-pg"
+    uplink1_portgroup: "edge-uplink1"
+    uplink2_portgroup: "edge-uplink2"
+
+   # The Uplink profile, Transportzones and IP pool need to be created in NSX-Manager before running this script!!!
+    uplink_profile: "edge_tn_uplink_profile"
+    overlay_tz: "tz_overlay"
+    vlan_tz: "tz_vlan"
+    tep_ip_pool: "edge-overlay"
+
+    cli_root_password: "Password!234"            # must meet 12-char complexity
+
+    # Edge node details
+    edges:
+      - name: "nsx-edge-1"
+        mgmt_ip: "10.0.17.103/24"
+        hostname: "nsx-edge-1"
+      - name: "nsx-edge-2"
+        mgmt_ip: "10.0.17.104/24"
+        hostname: "nsx-edge-2"
+      - name: "nsx-edge-3"
+        mgmt_ip: "10.0.17.105/24"
+        hostname: "nsx-edge-3"
+      - name: "nsx-edge-4"
+        mgmt_ip: "10.0.17.106/24"
+        hostname: "nsx-edge-4"
+    
+    # Edge cluster details
+    edge_cluster_name_t0: "Edge-Cluster-01"
+    edge_cluster_name_t1: "Edge-Cluster-02"
+    
+    # T0 and T1 details
+    tier0_name: "T0-GW"
+    local_as: 65002
+    remote_as: 65001
+    tier1_name: "T1-GW"
+
+    # Uplink details
+    uplink1:
+      vlan: 103
+      segment_name: "UPLINK-VLAN103"
+      nsx_ip1: "172.28.13.2/24"
+      nsx_ip2: "172.28.13.3/24"
+      neighbor_ip: "172.28.13.1"
+    uplink2:
+      vlan: 102
+      segment_name: "UPLINK-VLAN102"
+      nsx_ip1: "172.28.12.2/24"
+      nsx_ip2: "172.28.12.3/24"
+      neighbor_ip: "172.28.12.1"

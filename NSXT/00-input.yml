@@ -1,33 +1,40 @@
 ---
-    nsx_hostname: "10.0.17.101"                  # NSX-Manager IP or FQDN
+    nsx_hostname: "10.0.17.101"                  # NSX-Manager IP or FQDN (STATIC)
     nsx_username: "admin"
     nsx_password: "Password!234"
     validate_certs: false
 
-    vcenter_fqdn: "vcsa8.can.cs8.local"          # vCenter as registered in NSX (usually FQDN)
+    vcenter_fqdn: "vcsa8.can.cs8.local"          # vCenter IP or FQDN (STATIC)
     vcenter_username: "administrator@vsphere.local"
     vcenter_password: "Password!234"
+    vc_name: "vcsa8"                             # vCenter as registered in NSX (STATIC)
 
     datacenter: "AMVLAB"
     cluster: "CL1"
     datastore: "vsanDatastore"
     esxi_host: "hci02.can.cs8.local"             # any host in the cluster (required for VDS env)
 
-   # These portgroups need to be created in vCenter before running this script!!!
+    # Enviroment details (STATIC)
+    dns_servers: "10.0.15.254"
+    search_domains: "can.cs8.local"
+    ntp_servers: "10.0.15.250"
+    default_gateway_addresses: "10.0.17.10"
+
+   # These portgroups need to be created in vCenter before running this script!!! (STATIC)
     mgmt_portgroup: "mgmt"
-    overlay_portgroup: "all-pg"
     uplink1_portgroup: "edge-uplink1"
     uplink2_portgroup: "edge-uplink2"
 
-   # The Uplink profile, Transportzones and IP pool need to be created in NSX-Manager before running this script!!!
+   # The Uplink profile, Transportzones and IP pool need to be created in NSX-Manager before running this script!!! 
     uplink_profile: "edge_tn_uplink_profile"
     overlay_tz: "tz_overlay"
     vlan_tz: "tz_vlan"
-    tep_ip_pool: "edge-overlay"
+    tep_ip_pool: "edge-overlay"                  # (VARIABLE per TENANT)
 
     cli_root_password: "Password!234"            # must meet 12-char complexity
 
-    # Edge node details
+    # Edge node details (VARIABLE per TENANT)
+    form_factor: "MEDIUM"                        # SMALL / MEDIUM / LARGE / XLARGE
     edges:
       - name: "nsx-edge-1"
         mgmt_ip: "10.0.17.103/24"
@@ -42,17 +49,17 @@
         mgmt_ip: "10.0.17.106/24"
         hostname: "nsx-edge-4"
     
-    # Edge cluster details
+    # Edge cluster details (VARIABLE per TENANT)
     edge_cluster_name_t0: "Edge-Cluster-01"
     edge_cluster_name_t1: "Edge-Cluster-02"
     
-    # T0 and T1 details
+    # T0 and T1 details (VARIABLE per TENANT)
     tier0_name: "T0-GW"
-    local_as: 65002
-    remote_as: 65001
+    local_as: 65002                            # (STATIC)
+    remote_as: 65001                           # (STATIC)
     tier1_name: "T1-GW"
 
-    # Uplink details
+    # Uplink details (VARIABLE per TENANT)
     uplink1:
       vlan: 103
       segment_name: "UPLINK-VLAN103"

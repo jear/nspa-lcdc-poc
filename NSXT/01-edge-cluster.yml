@@ -20,7 +20,6 @@
         validate_certs: "{{ validate_certs }}"
 
         display_name: "{{ item.name }}"
-        description: "Deployed by Ansible"
 
         # === Datapath configuration (N-VDS) ===
         host_switch_spec:
@@ -31,9 +30,9 @@
                 - name: "{{ uplink_profile }}"
                   type: "UplinkHostSwitchProfile"
               pnics:
-                - device_name: "fp-eth1"
+                - device_name: "fp-eth0"
                   uplink_name: "m1"
-                - device_name: "fp-eth2"
+                - device_name: "fp-eth1"
                   uplink_name: "m2"
               ip_assignment_spec:
                 resource_type: "StaticIpPoolSpec"
@@ -52,21 +51,21 @@
             hostname: "{{ item.hostname }}"
             allow_ssh_root_login: true
             enable_ssh: true
-            dns_servers:
-              - "10.0.15.254"
-            search_domains:
-              - "can.cs8.local"
-            ntp_servers:
-              - "10.0.15.250"
+            dns_servers: 
+              - "{{ dns_servers }}"
+            search_domains: 
+              - "{{ search_domains }}"
+            ntp_servers: 
+              - "{{ ntp_servers }}"
 
           deployment_config:
-            form_factor: "MEDIUM"                     # SMALL / MEDIUM / LARGE / XLARGE
+            form_factor: "{{ form_factor }}"
             node_user_settings:
               cli_password: "{{ cli_root_password }}"
               root_password: "{{ cli_root_password }}"
             vm_deployment_config:
               placement_type: "VsphereDeploymentConfig"
-              vc_name: "vcsa8"
+              vc_name: "{{ vc_name }}"
               vc_username: "{{ vcenter_username }}"
               vc_password: "{{ vcenter_password }}"
               host: "{{ esxi_host }}"
@@ -74,7 +73,6 @@
               storage: "{{ datastore }}"
               management_network: "{{ mgmt_portgroup }}"
               data_networks:
-                - "{{ overlay_portgroup }}"
                 - "{{ uplink1_portgroup }}"
                 - "{{ uplink2_portgroup }}"
               ipv4_assignment_enabled: true
@@ -83,7 +81,7 @@
                     - "{{ item.mgmt_ip.split('/')[0] }}"
                   prefix_length: "{{ item.mgmt_ip.split('/')[1] }}"
               default_gateway_addresses:
-                - "10.0.17.10"
+                - "{{ default_gateway_addresses }}"
         state: present
       loop: "{{ edges }}"
       register: edge_deploy

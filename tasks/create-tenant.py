@@ -12,7 +12,7 @@ payload = { "account": {
 headers = {
     "accept": "application/json",
     "content-type": "application/json",
-    "authorization": "Bearer fa2e7317-93d6-448f-943c-6bed3ba53b71"
+    "authorization": "Bearer " + (bearerToken)
 }
 
 response = requests.post(url, json=payload, headers=headers, verify=False)

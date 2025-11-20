@@ -2,6 +2,13 @@ import requests
 
 url = "https://morpheus.lysdemolab.fr/api/accounts"
 
+bearerToken=morpheus['morpheus']['apiAccessToken']
+ 
+headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "authorization": "Bearer " + (bearerToken)
+}
 payload = { "account": {
         "role": { "id": 2 },
         "currency": "EUR",
@@ -9,11 +16,7 @@ payload = { "account": {
         "subdomain": "NR-Subdomain",
         "description": "Tenant for NR"
     } }
-headers = {
-    "accept": "application/json",
-    "content-type": "application/json",
-    "authorization": "Bearer " + (bearerToken)
-}
+
 
 response = requests.post(url, json=payload, headers=headers, verify=False)
 

@@ -2,7 +2,11 @@
 
 # Infra svc running on Vmware
 - Moprheus Entreprise
+- Simplivity
 - https://github.com/jear/my-infoblox
+
+# VME
+- https://hpe-vme-jear.lysdemolab.fr/login/account/1
 
 ## Kubernetes cluster hosting below services  ( 4 nodes  Rancher ) with : 
 - https://github.com/jear/my-rook-ceph  ( For CSI with RWX )

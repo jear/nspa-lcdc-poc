@@ -31,8 +31,8 @@
 - https://github.com/jear/my-artifactory ( OSS ) : for Disconnected Terraform/Puppet/Ansible provider repositories
   - https://artifactory.gpu02.lysdemolab.fr/ui/login
 
-# AI services on Kubernetes (nVidia + k8s)
-- https://github.com/jear/my-openwebui  : Disconnected  LLM with nVidia GPU
+# AI services  (nVidia )
+- k8s : https://github.com/jear/my-openwebui  : Disconnected  LLM with nVidia GPU
 - HPE VME : HVM hypervisor + nVidia 
 
 

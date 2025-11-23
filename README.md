@@ -15,6 +15,7 @@
 - https://github.com/jear/my-metallb ( for k8s LoadBalancer )
 - https://github.com/jear/my-traefik ( for Ingressroutes ) 
 - https://github.com/jear/my-harbor
+  - https://harbor.gpu02.lysdemolab.fr/
 
 ## Devops Infra services on Kubernetes (Rancher)
 - https://github.com/jear/my-keycloack

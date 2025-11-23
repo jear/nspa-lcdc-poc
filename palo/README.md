@@ -1,6 +1,8 @@
 # Palo VM deployment guide
 https://docs.paloaltonetworks.com/vm-series/11-1/vm-series-deployment/set-up-a-vm-series-firewall-on-an-esxi-server/install-a-vm-series-firewall-on-vmware-vsphere-hypervisor-esxi/perform-initial-configuration-on-the-vm-series-on-esxi
 
+https://knowledgebase.paloaltonetworks.com/KCSArticleDetail?id=kA10g000000PN07CAG
+
 ```
 
 configure

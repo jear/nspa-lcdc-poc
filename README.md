@@ -28,7 +28,7 @@
   - https://registry.ingress-gpu02.lysdemolab.fr
   - https://minio.ingress-gpu02.lysdemolab.fr
   - https://kas.ingress-gpu02.lysdemolab.fr
-- Loadbalancer.org 
+- Loadbalancer.org : GSLB = Polaris + PowerDNS
   - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )
   - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )
 - https://github.com/jear/my-awx ( Ansible )

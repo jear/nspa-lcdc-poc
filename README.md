@@ -24,6 +24,9 @@
   - https://pulp.gpu02.lysdemolab.fr/pulp/api/v3/
 - https://github.com/jear/my-gitlab
   - https://gitlab.ingress-gpu02.lysdemolab.fr/
+- Loadbalancer.org 
+  - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )
+  - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )
 - https://github.com/jear/my-awx ( Ansible )
   - https://awx.gpu02.lysdemolab.fr/#/login
 - https://github.com/jear/my-vault ( for secrets not internal Morpheus Cyphers )

@@ -14,6 +14,7 @@
 - https://github.com/jear/my-rook-ceph  ( For CSI with RWX )
 - https://github.com/jear/my-metallb ( for k8s LoadBalancer )
 - https://github.com/jear/my-traefik ( for Ingressroutes ) 
+- https://github.com/jear/my-harbor
 
 ## Devops Infra services on Kubernetes (Rancher)
 - https://github.com/jear/my-keycloack
@@ -24,6 +25,9 @@
   - https://pulp.gpu02.lysdemolab.fr/pulp/api/v3/
 - https://github.com/jear/my-gitlab
   - https://gitlab.ingress-gpu02.lysdemolab.fr/
+  - https://registry.ingress-gpu02.lysdemolab.fr
+  - https://minio.ingress-gpu02.lysdemolab.fr
+  - https://kas.ingress-gpu02.lysdemolab.fr
 - Loadbalancer.org 
   - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )
   - https://lb-adc-01.lysdemolab.fr/ ( Trial expired )

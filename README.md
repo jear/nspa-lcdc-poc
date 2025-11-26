@@ -1,6 +1,6 @@
 # nspa-lcdc-poc devops infra
 
-<img width="1332" height="684" alt="poc" src="https://github.com/user-attachments/assets/e14e2c7b-143f-4e1d-8d84-4b677cf306b9" />
+<img width="1316" height="539" alt="image" src="https://github.com/user-attachments/assets/78696829-51c9-4571-adc5-65c631f6923f" />
 
 # Infra svc running on Vmware
 - Moprheus Entreprise

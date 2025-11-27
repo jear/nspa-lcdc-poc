@@ -1,0 +1,314 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  collections:
+    - vmware.ansible_for_nsxt
+    - community.vmware
+
+  tasks:
+    - name: Discover available variable files
+      set_fact:
+        available_files: >-
+          {{ lookup('fileglob', 'vars/*.yml', wantlist=True) |
+             map('basename') |
+             list }}
+
+    - name: Prompt user to choose a file
+      ansible.builtin.pause:
+        prompt: |
+          Available variable files:
+          {% for f in available_files %}
+          {{ loop.index }}. {{ f }}
+          {% endfor %}
+
+          Enter number or filename (default: {{ available_files[0] }}):
+      register: choice
+
+    - name: Determine selected var file
+      set_fact:
+        varfile_path: >-
+          vars/{{
+            available_files[choice.user_input | int - 1]
+            if choice.user_input | string is match('^[0-9]+$')
+            else (choice.user_input | trim if choice.user_input is defined else available_files[0])
+          }}
+
+    - name: Show which file will be used
+      debug:
+        msg: "Loading variables from → {{ varfile_path }}"
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars_files:
+    - >-
+      {{ hostvars['localhost']['varfile_path'] }}
+
+  tasks:
+    - name: Confirm variables loaded
+      debug:
+        msg: "Running in {{ environment | default('unknown') }} environment"
+
+    
+    - name: Deploy and fully configure Edge Transport Nodes
+      vmware.ansible_for_nsxt.nsxt_transport_nodes:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+    
+        display_name: "{{ item.name }}"
+    
+        # === Datapath configuration (N-VDS) ===
+        host_switch_spec:
+          resource_type: "StandardHostSwitchSpec"
+          host_switches:
+            - host_switch_name: "nvds-edge"
+              host_switch_profiles:
+                - name: "{{ uplink_profile }}"
+                  type: "UplinkHostSwitchProfile"
+              pnics:
+                - device_name: "fp-eth0"
+                  uplink_name: "m1"
+                - device_name: "fp-eth1"
+                  uplink_name: "m2"
+              ip_assignment_spec:
+                resource_type: "StaticIpPoolSpec"
+                ip_pool_name: "{{ tep_ip_pool }}"
+              transport_zone_endpoints:
+                - transport_zone_name: "{{ overlay_tz }}"
+                - transport_zone_name: "{{ vlan_tz }}"
+    
+        # === Edge VM deployment info ===
+        node_deployment_info:
+          resource_type: "EdgeNode"
+          display_name: "{{ item.name }}"
+          deployment_type: "VIRTUAL_MACHINE"
+          fqdn: "{{ item.hostname }}"
+          node_settings:
+            hostname: "{{ item.hostname }}"
+            allow_ssh_root_login: true
+            enable_ssh: true
+            dns_servers: 
+              - "{{ dns_servers }}"
+            search_domains: 
+              - "{{ search_domains }}"
+            ntp_servers: 
+              - "{{ ntp_servers }}"
+    
+          deployment_config:
+            form_factor: "{{ form_factor }}"
+            node_user_settings:
+              cli_password: "{{ cli_root_password }}"
+              root_password: "{{ cli_root_password }}"
+            vm_deployment_config:
+              placement_type: "VsphereDeploymentConfig"
+              vc_name: "{{ vc_name }}"
+              vc_username: "{{ vcenter_username }}"
+              vc_password: "{{ vcenter_password }}"
+              host: "{{ esxi_host }}"
+              compute: "{{ cluster }}"
+              storage: "{{ datastore }}"
+              management_network: "{{ mgmt_portgroup }}"
+              data_networks:
+                - "{{ uplink1_portgroup }}"
+                - "{{ uplink2_portgroup }}"
+              ipv4_assignment_enabled: true
+              management_port_subnets:
+                - ip_addresses:
+                    - "{{ item.mgmt_ip.split('/')[0] }}"
+                  prefix_length: "{{ item.mgmt_ip.split('/')[1] }}"
+              default_gateway_addresses:
+                - "{{ default_gateway_addresses }}"
+        state: present
+      loop: "{{ edges }}"
+      register: edge_deploy
+      retries: 3
+      delay: 30
+    
+        # === Edge Cluster deployment info ===
+    - name: Create Edge Cluster for T0
+      vmware.ansible_for_nsxt.nsxt_edge_clusters:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ edge_cluster_name_t0 }}"
+        members:
+          - transport_node_name: "{{ edges[0].hostname }}"
+          - transport_node_name: "{{ edges[1].hostname }}"
+        state: present
+    
+    - name: Create Edge Cluster for T1
+      vmware.ansible_for_nsxt.nsxt_edge_clusters:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ edge_cluster_name_t1 }}"
+        members:
+          - transport_node_name: "{{ edges[2].hostname }}"
+          - transport_node_name: "{{ edges[3].hostname }}"
+        state: present
+    
+    
+    - name: Create Uplink VLAN Segments (VLAN Transport Zone)
+      vmware.ansible_for_nsxt.nsxt_policy_segment:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ item.segment_name }}"
+        transport_zone_display_name: "{{ vlan_tz }}"
+        vlan_ids: "{{ item.vlan }}"
+        state: present
+      loop:
+        - { vlan: "{{ uplink1.vlan }}", segment_name: "{{ uplink1.segment_name }}" }
+        - { vlan: "{{ uplink2.vlan }}", segment_name: "{{ uplink2.segment_name }}" }
+    
+    - name: Create Tier-0 with Interfaces and BGP configuration
+      vmware.ansible_for_nsxt.nsxt_policy_tier0:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+    
+        display_name: "{{ tier0_name }}"
+        ha_mode: "ACTIVE_ACTIVE"
+        failover_mode: "NON_PREEMPTIVE"
+        locale_services:
+          - state: present
+            display_name: "{{ tier0_name }}"
+            edge_cluster_info:
+              edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+            BGP:
+              state: present
+              enabled: true
+              local_as_num: "{{ local_as }}"
+              graceful_restart_config:
+                mode: "HELPER_ONLY"          # or "GR_AND_HELPER" if you want full GR
+              inter_sr_ibgp: false
+    
+              neighbors:
+                - display_name: "Neighbor-{{ uplink1.neighbor_ip }}"
+                  neighbor_address: "{{ uplink1.neighbor_ip }}"
+                  remote_as_num: "{{ remote_as }}"
+                  state: present
+    
+                - display_name: "Neighbor-{{ uplink2.neighbor_ip }}"
+                  neighbor_address: "{{ uplink2.neighbor_ip }}"
+                  remote_as_num: "{{ remote_as }}"
+                  state: present
+            interfaces:
+              - display_name: "{{ uplink1.edge1uplink_name }}"
+                state: present
+                segment_display_name: "{{ uplink1.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink1.nsx_ip1.split('/')[0] }}"
+                    prefix_len: "{{ uplink1.nsx_ip1.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[0].hostname }}"
+    
+              - display_name: "{{ uplink2.edge1uplink_name }}"
+                state: present
+                segment_display_name: "{{ uplink2.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink2.nsx_ip1.split('/')[0] }}"
+                    prefix_len: "{{ uplink2.nsx_ip1.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[0].hostname }}"
+              - display_name: "{{ uplink1.edge2uplink_name }}"
+                state: present
+                segment_display_name: "{{ uplink1.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink1.nsx_ip2.split('/')[0] }}"
+                    prefix_len: "{{ uplink1.nsx_ip2.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[1].hostname }}"
+    
+              - display_name: "{{ uplink2.edge2uplink_name }}"
+                state: present
+                segment_display_name: "{{ uplink2.segment_name }}"
+                subnets:
+                  - ip_addresses:
+                      - "{{ uplink2.nsx_ip2.split('/')[0] }}"
+                    prefix_len: "{{ uplink2.nsx_ip2.split('/')[1] }}"
+                edge_node_info:
+                  edge_cluster_display_name: "{{ edge_cluster_name_t0 }}"
+                  edge_node_display_name: "{{ edges[1].hostname }}"
+        state: present
+    
+    - name: create Tier1
+      vmware.ansible_for_nsxt.nsxt_policy_tier1:
+        hostname: "{{ nsx_hostname }}"
+        username: "{{ nsx_username }}"
+        password: "{{ nsx_password }}"
+        validate_certs: "{{ validate_certs }}"
+        display_name: "{{ tier1_name }}"
+        state: present
+        failover_mode: "NON_PREEMPTIVE"
+        enable_standby_relocation: False
+        route_advertisement_types:
+            - "TIER1_STATIC_ROUTES"
+            - "TIER1_CONNECTED"
+            - "TIER1_NAT"
+            - "TIER1_DNS_FORWARDER_IP"
+            - "TIER1_IPSEC_LOCAL_ENDPOINT"
+        tier0_display_name: "{{ tier0_name }}"
+        locale_services:
+          - state: present
+            display_name: "{{ tier1_name }}"
+            edge_cluster_info:
+              edge_cluster_display_name: "{{ edge_cluster_name_t1 }}"
+    
+        
+    - name: Done
+      ansible.builtin.debug:
+        msg: >-
+          Edge Cluster for T0 '{{ edge_cluster_name_t0 }}' created successfully!
+          Edge Cluster for T1 '{{ edge_cluster_name_t1 }}' created successfully!
+          Tier-0 '{{ tier0_name }}' created successfully!
+          Tier-1 '{{ tier1_name }}' created successfully!
+          Local AS: {{ local_as }}
+          BGP neighbors: {{ uplink1.neighbor_ip }} and {{ uplink2.neighbor_ip }}
+          Uplink interfaces: {{ uplink1.nsx_ip1 }} {{ uplink1.nsx_ip2 }} (VLAN {{ uplink1.vlan }}) and {{ uplink2.nsx_ip1 }} {{ uplink2.nsx_ip2 }} (VLAN {{ uplink2.vlan }})
+          Deployment completed successfully!
+          Used variable file: {{ hostvars['localhost']['varfile_path'] | basename }}
+
+    - name: Ensure 'used/' directory exists
+      ansible.builtin.file:
+        path: used
+        state: directory
+      delegate_to: localhost
+      run_once: true
+    
+    - name: Archive the used var file (so we have a record)
+      ansible.builtin.copy:
+        src: "{{ hostvars['localhost']['varfile_path'] }}"
+        dest: "used/{{ hostvars['localhost']['varfile_path'] | basename }}"
+        mode: preserve
+      delegate_to: localhost
+      run_once: true
+    
+    - name: Prevent reuse — delete the original var file
+      ansible.builtin.file:
+        path: "{{ hostvars['localhost']['varfile_path'] }}"
+        state: absent
+      delegate_to: localhost
+      run_once: true
+      ignore_errors: yes   # in case someone deleted it manually in the meantime
+    
+    - name: Final confirmation
+      ansible.builtin.debug:
+        msg: >-
+          Variable file {{ hostvars['localhost']['varfile_path'] | basename }} 
+          has been MOVED to the 'used/' folder and removed from vars/.
+          It cannot be selected again.

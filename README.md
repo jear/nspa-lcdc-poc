@@ -39,6 +39,7 @@
   - https://vault.gpu02.lysdemolab.fr/ui/vault/auth
 - https://github.com/jear/my-artifactory ( OSS ) : for Disconnected Terraform/Puppet/Ansible provider repositories
   - https://artifactory.gpu02.lysdemolab.fr/ui/login
+- https://github.com/jear/my-sigstore
 
 # AI services  (nVidia )
 - k8s : https://github.com/jear/my-openwebui  : Disconnected  LLM with nVidia GPU
